@@ -101,7 +101,7 @@ def get_2D_peaks(arr2D, plot=False, amp_min=DEFAULT_AMP_MIN):
                                        border_value=1)
 
     # Boolean mask of arr2D with True at peaks
-    detected_peaks = local_max - eroded_background
+    detected_peaks = local_max ^ eroded_background
 
     # extract peaks
     amps = arr2D[detected_peaks]
@@ -109,7 +109,7 @@ def get_2D_peaks(arr2D, plot=False, amp_min=DEFAULT_AMP_MIN):
 
     # filter peaks
     amps = amps.flatten()
-    peaks = zip(i, j, amps)
+    peaks = list(zip(i, j, amps))
     peaks_filtered = [x for x in peaks if x[2] > amp_min]  # freq, time, amp
 
     # get indices for frequency and time
@@ -127,7 +127,7 @@ def get_2D_peaks(arr2D, plot=False, amp_min=DEFAULT_AMP_MIN):
         plt.gca().invert_yaxis()
         plt.show()
 
-    return zip(frequency_idx, time_idx)
+    return list(zip(frequency_idx, time_idx))
 
 
 def generate_hashes(peaks, fan_value=DEFAULT_FAN_VALUE):
@@ -151,5 +151,5 @@ def generate_hashes(peaks, fan_value=DEFAULT_FAN_VALUE):
 
                 if t_delta >= MIN_HASH_TIME_DELTA and t_delta <= MAX_HASH_TIME_DELTA:
                     h = hashlib.sha1(
-                        "%s|%s|%s" % (str(freq1), str(freq2), str(t_delta)))
+                        ("%s|%s|%s" % (str(freq1), str(freq2), str(t_delta))).encode('utf-8'))
                     yield (h.hexdigest()[0:FINGERPRINT_REDUCTION], t1)
